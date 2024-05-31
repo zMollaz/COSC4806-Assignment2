@@ -1,5 +1,5 @@
 <?php
-require_once 'database.php';
+require_once 'config.php';
 
 function db_connect() {
     try { 

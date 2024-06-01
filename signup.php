@@ -1,4 +1,36 @@
+<?php
+require_once 'database.php';
 
+session_start();
+if (isset($_SESSION["authenticated"])) {
+  header("location: /");
+  exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  $username = trim($_POST['username']);
+  $password = trim($_POST['password']);
+  $verifypassword = trim($_POST['verifypassword']);
+
+  // Database connection
+    $db = db_connect();
+
+  // Check if username exists
+  $statement = $db->prepare('SELECT COUNT(*) FROM users WHERE username = ?');
+  $statement->execute([$username]);
+  if ($statement->fetchColumn() > 0) {
+      // Username exists
+      header("Location: signup.php?error=Username already exists");
+      exit;
+  }
+
+}
+
+$error = '';
+if(isset($_GET['error'])) {
+  $error = $_GET['error'];
+}
+?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -7,7 +39,7 @@
 <body>
   <h1>Create account</h1>
   <?php if ($error): ?>
-    <p style="color:red;"><?php echo htmlspecialchars($error); ?></p>
+    <p style="color:red;"><?php echo $error; ?></p>
   <?php endif; ?>
   <form action="signup.php" method="POST">
     <label for="username">Username:</label>

@@ -24,6 +24,9 @@ if(isset($_SESSION["authenticated"])) {
       <br>
       <br>
       <input type="submit" value="Submit">
+      <br>
+      <br>
+      <a href="signup.php">Create account</a>
     </form>
   </body>
 </html>

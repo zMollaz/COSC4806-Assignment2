@@ -9,6 +9,7 @@ Class User {
     $rows = $statment->fetchAll();
     return $rows;
   }
+
 }
   
 echo "<pre>"; 

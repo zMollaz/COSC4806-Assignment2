@@ -1,6 +1,15 @@
 <?php
 session_start();
-if(!isset($_SESSION["authenticated"])) {
+
+if (isset($_SESSION["authenticated"])) {
+  // User already authenticated (logged in through other means)
+} else if (isset($_GET["success"]) && $_GET["success"] == "Account created successfully") {
+  // Successful signup detected, set the session variable
+  $_SESSION["authenticated"] = true;
+  // Display welcome message
+
+} else {
+  // Not authenticated, redirect to login
   header("location: /login.php");
 }
 ?>

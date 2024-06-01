@@ -1,10 +1,9 @@
 <?php
 require_once 'database.php';
-
 session_start();
 if (isset($_SESSION["authenticated"])) {
   header("location: /");
-  die;
+  die();
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -13,33 +12,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $verifypassword = trim($_POST['verifypassword']);
 
   // Database connection
-    $db = db_connect();
+  $db = db_connect();
 
   // Check if username exists
   $statement = $db->prepare('SELECT COUNT(*) FROM users WHERE username = ?');
   $statement->execute([$username]);
   if ($statement->fetchColumn() > 0) {
-      // Username exists
-      header("Location: signup.php?error=Username already exists");
-      die();
+    // Username exists
+    header("Location: signup.php?error=Username already exists");
+    die();
   }
+
   // Check if passwords match
   if ($password !== $verifypassword) {
     header("Location: signup.php?error=Passwords do not match");
-      die();
+    die();
   }
 
   $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-    $statment = $db->prepare('INSERT INTO users (username, password) VALUES (?, ?)');
+  $statement = $db->prepare('INSERT INTO users (username, password) VALUES (?, ?)');
 
-  if ($statment->execute([$username, $hashed_password])) {
-    // Registration successful
+  if ($statement->execute([$username, $hashed_password])) {
     $_SESSION["authenticated"] = true;
-    header("Location: index.php?success=Account created successfully");
+    $_SESSION["username"] = $username; 
+    header("Location: index.php");
     die();
   } else {
-    // Registration failed
-      $statment->close();
+    $statement->close();
     $db->close();
     header("Location: signup.php?error=Registration failed, please try again");
     die();
@@ -47,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $error = '';
-if(isset($_GET['error'])) {
+if (isset($_GET['error'])) {
   $error = $_GET['error'];
 }
 ?>
@@ -68,7 +67,7 @@ if(isset($_GET['error'])) {
     <br><br>
     <label for="password">Password:</label>
     <br>
-     <input type="password" id="password" name="password" placeholder="Enter your password" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}" title="Password must contain at least 8 characters, including one uppercase letter, one lowercase letter, one number, and one special character." required>
+    <input type="password" id="password" name="password" placeholder="Enter your password" title="Password must contain at least 8 characters, including one uppercase letter, one lowercase letter, one number, and one special character." required>
     <br><br>
     <label for="verifypassword">Verify password:</label>
     <br>

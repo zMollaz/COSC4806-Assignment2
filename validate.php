@@ -1,25 +1,36 @@
 <?php
-  session_start();
+session_start();
 
-  $valid_username = "admin";
-  $valid_password = "123";
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $username = trim($_POST['username']);
+    $password = trim($_POST['password']);
 
-  $username = $_POST["username"];
-  $password = $_POST["password"];
-
-  if ($username == $valid_username && $password == $valid_password) {
-    $_SESSION["username"] = $username;
-    $_SESSION["authenticated"] = true;
-    $_SESSION["login_attempts"] = 1;
-    header("location: /index.php");
-    
-  } else {
-    if (!isset($_SESSION["login_attempts"])) {
-        $_SESSION["login_attempts"] = 1;
-    } else {
-        $_SESSION["login_attempts"]++;
+    if (empty($username) || empty($password)) {
+        header("Location: login.php?error=All fields are required.");
+        die();
     }
-    echo "Number of unsuccessful login attempts: " . $_SESSION["login_attempts"];
-    echo '<p><a href="/login.php">Back to login</a></p>';
-  }
+
+    // Database connection
+    require_once 'database.php';
+    $db = db_connect();
+
+    // Check if the user exists and verify the password
+    $statement = $db->prepare('SELECT id, username, password FROM users WHERE username = ?');
+    $statement->execute([$username]);
+    $user = $statement->fetch();
+    if (!$user || !password_verify($password, $user['password'])) {
+        header("Location: login.php?error=Invalid username or password.");
+        die();
+    }
+    // Authentication successful, set session variables
+    $_SESSION["authenticated"] = true;
+    $_SESSION["username"] = $user['username'];
+    $_SESSION["user_id"] = $user['id'];
+
+    header("Location: index.php");
+    die();
+} else {
+    // header("Location: login.php");
+    // die();
+}
 ?>

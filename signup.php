@@ -28,10 +28,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header("Location: signup.php?error=Passwords do not match");
     die();
   }
-
+  // Hash the password and add user to db
   $hashed_password = password_hash($password, PASSWORD_DEFAULT);
   $statement = $db->prepare('INSERT INTO users (username, password) VALUES (?, ?)');
-
   if ($statement->execute([$username, $hashed_password])) {
     $_SESSION["authenticated"] = true;
     $_SESSION["username"] = $username; 
@@ -67,7 +66,7 @@ if (isset($_GET['error'])) {
     <br><br>
     <label for="password">Password:</label>
     <br>
-    <input type="password" id="password" name="password" placeholder="Enter your password" title="Password must contain at least 8 characters, including one uppercase letter, one lowercase letter, one number, and one special character." required>
+    <input type="password" id="password" name="password" placeholder="Enter your password" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}" title="Password must contain at least 8 characters, including one uppercase letter, one lowercase letter, one number, and one special character." required>
     <br><br>
     <label for="verifypassword">Verify password:</label>
     <br>

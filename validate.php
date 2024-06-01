@@ -10,7 +10,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         die();
     }
 
-    // Database connection
     require_once 'database.php';
     $db = db_connect();
 
@@ -22,15 +21,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header("Location: login.php?error=Invalid username or password.");
         die();
     }
-    // Authentication successful, set session variables
+    // Set auth session variables
     $_SESSION["authenticated"] = true;
     $_SESSION["username"] = $user['username'];
-    $_SESSION["user_id"] = $user['id'];
 
     header("Location: index.php");
     die();
 } else {
-    // header("Location: login.php");
-    // die();
+    header("Location: login.php");
+    die();
 }
 ?>

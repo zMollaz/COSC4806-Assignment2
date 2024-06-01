@@ -1,8 +1,13 @@
 <?php
-session_start();
-if(isset($_SESSION["authenticated"])) {
-  header("location: /");
-}
+  session_start();
+  if(isset($_SESSION["authenticated"])) {
+    header("location: /");
+  }
+
+  $error = '';
+  if (isset($_GET['error'])) {
+    $error = $_GET['error'];
+  }
 ?>
 <!DOCTYPE html>
 <html>
@@ -12,6 +17,9 @@ if(isset($_SESSION["authenticated"])) {
 
   <body>
     <h1>Login</h1>
+    <?php if ($error): ?>
+      <p style="color:red;"><?php echo $error; ?></p>
+    <?php endif; ?>
     <form action="validate.php" method="POST">
       <label for="username">Username:</label>
       <br>

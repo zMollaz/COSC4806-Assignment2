@@ -4,7 +4,7 @@ require_once 'database.php';
 session_start();
 if (isset($_SESSION["authenticated"])) {
   header("location: /");
-  exit;
+  die;
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -21,9 +21,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   if ($statement->fetchColumn() > 0) {
       // Username exists
       header("Location: signup.php?error=Username already exists");
-      exit;
+      die();
+  }
+  // Check if passwords match
+  if ($password !== $verifypassword) {
+    header("Location: signup.php?error=Passwords do not match");
+      die();
   }
 
+  $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+    $statment = $db->prepare('INSERT INTO users (username, password) VALUES (?, ?)');
+
+  if ($statment->execute([$username, $hashed_password])) {
+    // Registration successful
+    $_SESSION["authenticated"] = true;
+    header("Location: index.php?success=Account created successfully");
+    die();
+  } else {
+    // Registration failed
+      $statment->close();
+    $db->close();
+    header("Location: signup.php?error=Registration failed, please try again");
+    die();
+  }
 }
 
 $error = '';
@@ -48,7 +68,7 @@ if(isset($_GET['error'])) {
     <br><br>
     <label for="password">Password:</label>
     <br>
-    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+     <input type="password" id="password" name="password" placeholder="Enter your password" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}" title="Password must contain at least 8 characters, including one uppercase letter, one lowercase letter, one number, and one special character." required>
     <br><br>
     <label for="verifypassword">Verify password:</label>
     <br>

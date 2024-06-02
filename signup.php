@@ -11,6 +11,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $password = trim($_POST['password']);
   $verifypassword = trim($_POST['verifypassword']);
 
+  // Password pattern
+  $passwordPattern = '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$/';
+
+  // Check if fields are empty
+  if (empty($username) || empty($password) || empty($verifypassword)) {
+    header("Location: signup.php?error=All fields are required");
+    die();
+  }
+
+  // Check if passwords match
+  if ($password !== $verifypassword) {
+    header("Location: signup.php?error=Passwords do not match");
+    die();
+  }
+
+  // Validate password pattern
+  if (!preg_match($passwordPattern, $password)) {
+    header("Location: signup.php?error=Password must contain at least 8 characters, including one uppercase letter, one lowercase letter, one number, and one special character.");
+    die();
+  }
+
   // Database connection
   $db = db_connect();
 
@@ -23,11 +44,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     die();
   }
 
-  // Check if passwords match
-  if ($password !== $verifypassword) {
-    header("Location: signup.php?error=Passwords do not match");
-    die();
-  }
   // Hash the password and add user to db
   $hashed_password = password_hash($password, PASSWORD_DEFAULT);
   $statement = $db->prepare('INSERT INTO users (username, password) VALUES (?, ?)');
@@ -57,7 +73,7 @@ if (isset($_GET['error'])) {
 <body>
   <h1>Create account</h1>
   <?php if ($error): ?>
-    <p style="color:red;"><?php echo $error; ?></p>
+    <p style="color:red;"><?php echo htmlspecialchars($error); ?></p>
   <?php endif; ?>
   <form action="signup.php" method="POST">
     <label for="username">Username:</label>
